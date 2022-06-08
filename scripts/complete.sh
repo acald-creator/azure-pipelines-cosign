@@ -61,19 +61,21 @@ az role definition create --role-definition key-vault-verify.json
 
 az role assignment create --role "Key Reader + Verify" --scope "$AZ_KVNAME_ID/keys/cosignkey" --assignee-object-id $KEYVAULT_READER_OBJECT_ID --assignee-principal-type ServicePrincipal
 
-docker pull nginx:latest
-docker tag nginx $AZ_ACRHOST/nginx:v1
+# docker pull nginx:latest
+# docker tag nginx $AZ_ACRHOST/nginx:v1
 az acr login -n $AZ_ACRNAME
-docker push $AZ_ACRHOST/nginx:v1
+docker build -t $AZ_ACRHOST/hello:v1 -f ../Dockerfile
+docker tag nginx $AZ_ACRHOST/hello:v1
+docker push $AZ_ACRHOST/hello:v1
 
 # Sign tagged docker image with cosign
 AZURE_CLIENT_ID=$KEYVAULT_SIGNER_CLIENT_ID
 AZURE_CLIENT_SECRET=$KEYVAULT_SIGNER_SECRET
-cosign sign --key "azurekms://$AZ_KVNAME.vault.azure.net/cosignkey" $AZ_ACRHOST/nginx:v1
+cosign sign -a last_commit=$(git rev-parse HEAD) --key "azurekms://$AZ_KVNAME.vault.azure.net/cosignkey" $AZ_ACRHOST/hello:v1
 
 # Verify signed docker image
 AZURE_CLIENT_ID=$KEYVAULT_READER_CLIENT_ID
 AZURE_CLIENT_SECRET=$KEYVAULT_READER_SECRET
-cosign verify --key "azurekms://$AZ_KVNAME.vault.azure.net/cosignkey" $AZ_ACRHOST/nginx:v1
+cosign verify --key "azurekms://$AZ_KVNAME.vault.azure.net/cosignkey" $AZ_ACRHOST/hello:v1
 
 az role assignment create --role "AcrPush" --scope $AZ_ACR_ID --assignee-object-id $KEYVAULT_SIGNER_OBJECT_ID --assignee-principal-type ServicePrincipal
