@@ -33,7 +33,7 @@ jobs:
         with:
           registry: ${{ secrets.REGISTRY_HOST }}
           username: ${{ secrets.CLIENTID }}
-          passowrd: ${{ secrets.CLIENTSECRET }}
+          password: ${{ secrets.CLIENTSECRET }}
           
       # Docker build image
       - name: Docker build
