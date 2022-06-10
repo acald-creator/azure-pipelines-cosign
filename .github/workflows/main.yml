@@ -52,7 +52,7 @@ jobs:
       # Docker build image
       - name: Docker build
         shell: bash
-        run: docker build -t ${{ secrets.REGISTRY_HOST }}/hello:latest -f ./Dockerfile .
+        run: docker build -t ${{ secrets.REGISTRY_HOST }}/hello:latest -f ./simple-hello/Dockerfile .
 
       # Sign image with cosign
       - name: Sign image
